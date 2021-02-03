@@ -1,0 +1,191 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class Input {
+
+   private double value;
+   private double weight;
+   private List<Input> ListInputs = new ArrayList<>();
+
+    public Input() {
+    }
+
+    public Input(double value, double weight) {
+        this.value = value;
+        this.weight = weight;
+    }
+    void setListInputs(int NumberOfInputs){
+        Random r = new Random();
+        for(int i=0;i<NumberOfInputs;i++){
+            int randomValue = ThreadLocalRandom.current().nextInt(0, 1 + 1);//0,1
+            double randomWeight = (r.nextInt(21)-10) / 10.0;//-1.0,1.0
+            ListInputs.add(new Input(randomValue,randomWeight));
+        }
+    }
+
+    public List<Input> getListInputs() {
+        return ListInputs;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+
+}
+//==========================================================
+import java.util.Random;
+
+public class Main {
+
+    public static void main(String[] args) {
+       Neuron neuron = new Neuron();
+        System.out.println(neuron.Activate());
+        System.out.println("Resoult: "+neuron.getResult());
+
+    }
+}
+//==============================================
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class Neuron {
+    private double InputsSum;
+    private double bias;
+    double sigma;
+    private List<Integer> firstResult = new ArrayList<>();
+    private List<Integer> functionResult = new ArrayList<>();
+    private List<Double> sigmaList = new ArrayList<>();
+    private List<Double> biasList = new ArrayList<>();
+    private List<Input> ListInputs = new ArrayList<>();
+    private List<Double> sumOfInputs = new ArrayList<>();
+
+
+    List<Double> CalculateSum(Integer numberOfNeurons, Integer numberOfInputs) {
+        Input input = new Input();
+        input.setListInputs(numberOfInputs);
+        for (int i = 0; i < numberOfNeurons; i++) {
+            Random r = new Random();
+            bias = (r.nextInt(31) - 15) / 10.0;
+            System.out.println("bias: " + bias);
+            biasList.add(bias);
+
+        }
+        ListInputs = input.getListInputs();
+        for (Input input1 : ListInputs) {
+            System.out.println("Value of input: " + input1.getValue() + " w: " + input1.getWeight());
+        }
+        for (int x = 0; x < numberOfNeurons; x++) {
+            Random r = new Random();
+
+            if (numberOfNeurons > 1) {
+                for (int z = 0; z < ListInputs.size(); z++) {
+                    InputsSum = 0;
+                    Input inputs = ListInputs.get(z);
+                    for (int w = 0; w < ListInputs.size(); w++) {
+                        Input inputPom = ListInputs.get(w);
+                        InputsSum += inputPom.getValue() * inputs.getWeight();
+                    }
+
+                    sumOfInputs.add(InputsSum);
+                    System.out.println("Sum of inputs: " + InputsSum);
+
+
+                }
+                sigmaList.add(sumOfInputs.get(x) + biasList.get(x));
+               // System.out.println("InputsSum: " + sumOfInputs.get(x) + " + biasList.get(x): " + biasList.get(x) + " = " + " sigmaList:" + sigmaList.get(x));
+                System.out.println("sigma: " + sigmaList.get(x));
+            } else {
+                for (Input inputs : ListInputs) {
+                    InputsSum += inputs.getValue() * (inputs.getWeight());
+
+                    System.out.println("Sum of inputs: " + InputsSum);
+                }
+                double sigma = InputsSum + biasList.get(0);
+                System.out.println("sigma: " + sigma);
+            }
+            InputsSum = 0;
+            sigma = 0;
+        }
+        return sigmaList;
+
+    }
+
+    List<Integer> Activate() {
+        Random r = new Random();
+        Input input = new Input();
+        List<Double> sigma = CalculateSum(2, 2);
+
+
+        for (int i = 0; i < sigma.size(); i++) {
+            if (sigma.get(i) > 0) {
+                functionResult.add(1);
+                firstResult.add(1);
+            } else {
+                functionResult.add(0);
+                firstResult.add(0);
+            }
+        }
+
+        if (functionResult.size() > 1) {
+            System.out.println("====Result for first layer: " + functionResult + "====");
+
+            return SecondLayer(functionResult);
+
+        }
+
+        return functionResult;
+    }
+
+    List<Integer> SecondLayer(List<Integer> listValues) {
+        double bias;
+        double sum = 0;
+        Random r = new Random();
+        double randomWeight = (r.nextInt(21) - 10) / 10.0;//-1.0,1.0
+        bias = (r.nextInt(31) - 15) / 10.0;
+        System.out.println("bias: " + bias);
+        System.out.println("weight: " + randomWeight);
+        for (int i = 0; i < listValues.size(); i++) {
+            sum += listValues.get(i) * randomWeight;
+
+        }
+        sum += bias;
+        System.out.println("Sum+bias: " + sum);
+        functionResult.clear();
+        if (sum > 0) {
+            functionResult.add(1);
+        } else
+            functionResult.add(0);
+
+        return functionResult;
+    }
+
+
+    List<Integer> getResult() {
+        System.out.println("====Final result====");
+
+        for (int x = 0; x < firstResult.size(); x++) {
+            System.out.println("----Neuron" + x + "-(value:" + firstResult.get(x) + "-)");
+            if (x < firstResult.size() - 1) {
+                if (firstResult.size() % 2 == 0 && x == (firstResult.size() - 1) / 2) {
+                    System.out.println("                    |-------------Neuron" + firstResult.size() + "(-value:" + functionResult.get(0) + ")");
+                } else if (firstResult.size() % 2 != 0 && x == (firstResult.size() - 1) / 2)
+                    System.out.println("                    |-------------Neuron" + firstResult.size() + "(-value:" + functionResult.get(0) + ")");
+                System.out.println("                    |");
+                System.out.println("                    /");
+            }
+        }
+
+        return functionResult;
+    }
+
+
+}
+
